@@ -1,0 +1,274 @@
+substitutions:
+  ha_dash_url: http://192.168.0.36:8123/home/overview
+
+esphome:
+  name: panelr2
+  friendly_name: panelr2
+  platformio_options:
+    board_build.esp-idf.memory_type: qio_opi
+    board_build.flash_mode: dio
+  on_boot:
+    priority: 600
+    then:
+      - lambda: |-
+          uint8_t cmd[1] = { 0x10 };
+          id(i2c_bus).write(0x30, cmd, 1);
+
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  cpu_frequency: 240MHz
+  framework:
+    type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+    sdkconfig_options:
+      COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+    components:
+      - name: "espressif/esp_websocket_client"
+        ref: 1.5.0
+      - name: "espressif/esp-dsp"
+        ref: 1.7.0
+      - name: "bitbank2/jpegdec"
+        source: https://github.com/strange-v/jpegdec-esphome
+  
+
+external_components:
+  - source: github://strange-v/RemoteWebViewClient@main
+    refresh: 0s
+    components: [ remote_webview ]
+
+# Enable logging
+logger:
+  level: DEBUG
+  logs:
+    touch: DEBUG
+    display: DEBUG
+    sensor: DEBUG
+    homeassistant: DEBUG
+    api: DEBUG
+    component: DEBUG
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret esp_encryption_key
+
+ota:
+  - platform: esphome
+    password: "hrubaxxx"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: 192.168.0.69
+    gateway: 192.168.0.2
+    subnet: 255.255.255.0
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${device_name} Fallback AP"
+   
+
+captive_portal:
+
+
+
+psram:
+  mode: octal
+  speed: 120MHz
+
+i2c:
+  sda: 15
+  scl: 16
+  frequency: 400000
+  id: i2c_bus
+
+# Backlight configuration (Remains the same)
+i2c_device:
+  id: pca9557
+  address: 0x18
+  i2c_id: i2c_bus
+
+output:
+  - platform: template
+    id: stc8h_backlight_output
+    type: float
+    write_action:
+      - lambda: |-
+          uint8_t command;
+
+          if (state <= 0.0f) {
+            // OFF
+            command = 245;
+          } else {
+            // Map 0.0–1.0 to brightness levels:
+            // state=1.0 (max brightness) → 0
+            // state→0.0 (min brightness) → 244
+            // Formula: invert the scale (higher state = lower value = brighter)
+            command = (uint8_t) roundf((1.0f - state) * 244.0f);
+          }
+
+          uint8_t cmd[1] = { command };
+          id(i2c_bus).write(0x30, cmd, 1);
+
+          ESP_LOGD("backlight", "State: %.2f | Brightness command: %d", state, command);
+
+  - platform: template
+    id: backlight_output
+    type: binary
+    write_action:
+      - lambda: |-
+          // PCA9557 Configuration
+          uint8_t config_reg = 0x03;
+          uint8_t config_data = 0xFD;
+          id(pca9557).write_byte(config_reg, config_data);
+          delay(10);
+          // PCA9557 Output Control
+          uint8_t output_reg = 0x01;
+          uint8_t output_data = state ? 0x02 : 0x00;
+          id(pca9557).write_byte(output_reg, output_data);
+
+binary_sensor:
+  - platform: homeassistant
+    name: "Backlight Control Boolean"
+    entity_id: input_boolean.panelr2_bcklight
+    internal: true
+    on_state:
+      then:
+        - logger.log:
+            format: "HA Backlight Boolean received state: %s"
+            args:
+              - 'x ? "ON" : "OFF"'
+        
+        - if:
+            condition:
+              # Check if the Home Assistant boolean (x) is TRUE
+              lambda: 'return x;'
+            then:
+              # Turn the light ON (it will default to 100% brightness due to restore_mode)
+              - light.turn_on:
+                  id: backlight_light
+            else:
+              # Turn the light OFF (sends 0x05 command)
+              - light.turn_off:
+                  id: backlight_light
+
+number:
+  - platform: homeassistant
+    name: "Backlight Slider Source"
+    entity_id: input_number.panelr2_bcklight 
+    internal: true
+    # The slider's value (0 to 5) is received as 'x'
+    on_value:
+      then:
+        - logger.log:
+            format: "HA Slider received value: %.2f"
+            args:
+              - x
+        # Use the light.turn_on action with the brightness parameter
+        - light.turn_on:
+            id: backlight_light
+            # 💡 ADJUSTED LAMBDA: Scale the input value (x) from 0-5 to the 0.0-1.0 range
+            # Scaling formula: x / 5.0
+            brightness: !lambda 'return x / 5.0;'
+
+
+light:
+#  - platform: binary
+#    name: "Backlight"
+#    output: backlight_output
+#    id: backlight
+#    restore_mode: ALWAYS_ON
+  - platform: monochromatic
+    name: "Panelr2 Backlight"
+    id: backlight_light
+    output: stc8h_backlight_output # Link to the new float output
+    internal: false
+    restore_mode: ALWAYS_ON
+
+display:
+  - platform: rpi_dpi_rgb
+    id: my_display
+    color_order: RGB
+    invert_colors: true
+    update_interval: 33ms
+    auto_clear_enabled: false
+    dimensions:
+      width: 800
+      height: 480
+    de_pin: 42
+    hsync_pin: 40
+    vsync_pin: 41
+    pclk_pin: 39
+    pclk_frequency: 18MHz
+    data_pins:
+      red:
+        - 7
+        - 17
+        - 18
+        - 3
+        - 46
+      green:
+        - 9
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+      blue:
+        - 21
+        - 47
+        - 48
+        - 45
+        - 38
+
+touchscreen:
+  platform: gt911
+  address: 0x5D
+  transform:
+    mirror_x: false
+    mirror_y: false
+  i2c_id: i2c_bus
+  id: touch_gt911
+  display: my_display
+
+#here replace the ip to your HA device and use your dashboard that you want to be displayed by crowpad
+remote_webview:
+  id: rwv
+  display_id: my_display
+  touchscreen_id: touch_gt911
+  device_id: panelr2
+  server: 192.168.0.36:8081
+#  url: "self-test" #http://192.168.220.130:8123/dashboard-mobile/0  # set url: "self-test" to initiate the self-test
+  url: http://192.168.0.36:8123
+ # full_frame_tile_count: 1
+ # max_bytes_per_msg: 66000
+  #jpeg_quality: 70
+  #big_endian: false
+  full_frame_tile_count: 1
+ 
+  jpeg_quality: 85
+  max_bytes_per_msg: 72428
+
+text:
+  - platform: template
+    id: rwv_url
+    name: "URL"
+    optimistic: true
+    restore_value: false
+    mode: TEXT
+    min_length: 1
+    set_action:
+      - lambda: |-
+          if (!id(rwv).open_url(std::string(x.c_str()))) {
+            id(rwv).set_url(std::string(x.c_str()));
+            ESP_LOGI("remote_webview", "URL queued (not connected): %s", x.c_str());
+          }
