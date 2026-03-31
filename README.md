@@ -8,6 +8,7 @@ There are a number of improvements necessary to make this particular project mor
 
 I have modified the code for version v1.2.Fixed audio issues, no responses could be heard.Added backlight control.Increased memory speed to 120Mhz.It's not perfect but it works.
 Still need to fine-tune a few things
+
 I added a control panel for HA.  All credits to the authors
 
 voice assistant
