@@ -7,19 +7,12 @@ This was written for a forthcoming XDA article. It will be updated over time. Wh
 General design needs to be improved, but it is functional and significantly faster thanks to LVGL.
 
 What works:
-
 * Display
 * Touchscreen (though no features currently require it)
 * Microphone
-* Showing response on screen
 * Wake word detection
-* Timers
+* Audio output 
+* Display brightness control 
 
 What doesn't work:
-
-* Display brightness control (not implemented yet)
-* Timer ringers can only be turned off from the Home Assistant UI
-
-Not tested:
-
-* Audio output (theoretically should work, but I do not have a speaker to test it with)
+* Showing response on screen
