@@ -7,9 +7,11 @@ Still need to fine-tune a few things
 I added a control panel for HA.  All credits to the authors
 
 voice assistant
+
 https://github.com/Incipiens/Adam-Home-Assistant-Snippets
 
 
 control panel
+
 https://github.com/strange-v/RemoteWebViewServer
 
