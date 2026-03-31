@@ -1,3 +1,5 @@
+# voice assistant v1.2
+
 substitutions:
   loading_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/loading_320_240.png
   idle_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/idle_320_240.png
@@ -93,8 +95,8 @@ wifi:
   ap:
 
   manual_ip:
-    static_ip: 192.168.0.67
-    gateway: 192.168.0.2
+    static_ip: 192.168.xx.xx
+    gateway: 192.168.xx.xx
     subnet: 255.255.255.0
   on_connect:
     - script.execute: draw_display
