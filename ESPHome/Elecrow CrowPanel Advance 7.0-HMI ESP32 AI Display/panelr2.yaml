@@ -1,5 +1,5 @@
 substitutions:
-  ha_dash_url: http://192.168.0.36:8123/home/overview
+  ha_dash_url: http://192.168.xx.xx:8123/home/overview
 
 esphome:
   name: panelr2
@@ -63,14 +63,14 @@ api:
 
 ota:
   - platform: esphome
-    password: "hrubaxxx"
+    password: "xxxxxxxxx"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   manual_ip:
-    static_ip: 192.168.0.69
-    gateway: 192.168.0.2
+    static_ip: 192.168.xx.xx
+    gateway: 192.168.xx.xx
     subnet: 255.255.255.0
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -246,9 +246,9 @@ remote_webview:
   display_id: my_display
   touchscreen_id: touch_gt911
   device_id: panelr2
-  server: 192.168.0.36:8081
+  server: 192.168.0.xx:8081
 #  url: "self-test" #http://192.168.220.130:8123/dashboard-mobile/0  # set url: "self-test" to initiate the self-test
-  url: http://192.168.0.36:8123
+  url: http://192.168.0.xx:8123
  # full_frame_tile_count: 1
  # max_bytes_per_msg: 66000
   #jpeg_quality: 70
