@@ -246,9 +246,9 @@ remote_webview:
   display_id: my_display
   touchscreen_id: touch_gt911
   device_id: panelr2
-  server: 192.168.0.xx:8081
+  server: 192.168.xx.xx:8081
 #  url: "self-test" #http://192.168.220.130:8123/dashboard-mobile/0  # set url: "self-test" to initiate the self-test
-  url: http://192.168.0.xx:8123
+  url: http://192.168.xx.xx:8123
  # full_frame_tile_count: 1
  # max_bytes_per_msg: 66000
   #jpeg_quality: 70
