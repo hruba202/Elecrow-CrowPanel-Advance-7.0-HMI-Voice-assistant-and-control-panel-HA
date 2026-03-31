@@ -1,3 +1,5 @@
+# control panel v1.3
+
 substitutions:
   ha_dash_url: http://192.168.xx.xx:8123/home/overview
 
