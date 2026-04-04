@@ -1,3 +1,4 @@
+voice assistant + control panel:
 ![IMG_1738](https://github.com/user-attachments/assets/79f96051-7d93-4449-8045-8ba856fa66a5)
 
 ![IMG_1743](https://github.com/user-attachments/assets/93e879ad-023c-4477-bb5c-54865a70bc2a)
