@@ -1,3 +1,5 @@
+# changed assistant pictures,adjusted the clock,added antiburn button on display(after click 3min antiburn, touch the display to interrupt antiburn)
+
 substitutions:
   loading_illustration_file: http://homeassistant.local:8123/local/images/ai2.png                         #https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/loading_320_240.png
   idle_illustration_file: http://homeassistant.local:8123/local/images/ai.jpg   #https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/idle_320_240.png
