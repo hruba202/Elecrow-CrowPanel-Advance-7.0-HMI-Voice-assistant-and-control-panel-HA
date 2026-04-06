@@ -1,0 +1,9 @@
+time:
+  # An interval-based update mechanism
+  interval: 1  # Update every second
+
+  # An on-time-sync trigger
+  on_time_sync:
+    enabled: true
+    sync_interval: "1 minute"  # Example configuration for syncing every minute
+    sync_time: "18:00:21"  # Setting the specific time for triggering sync
