@@ -1,3 +1,4 @@
+#voice assistant for v1.3
 substitutions:
   loading_illustration_file: http://homeassistant.local:8123/local/images/loa.png
   idle_illustration_file: http://homeassistant.local:8123/local/images/idle.png
