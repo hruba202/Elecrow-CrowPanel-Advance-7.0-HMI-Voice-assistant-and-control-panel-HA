@@ -1,0 +1,1296 @@
+substitutions:
+  loading_illustration_file: http://homeassistant.local:8123/local/images/loa.png
+  idle_illustration_file: http://homeassistant.local:8123/local/images/idle.png
+  listening_illustration_file: http://homeassistant.local:8123/local/images/list.png
+  thinking_illustration_file: http://homeassistant.local:8123/local/images/th.png
+  replying_illustration_file: http://homeassistant.local:8123/local/images/sp320.png
+  error_illustration_file: http://homeassistant.local:8123/local/images/error-word.jpg
+  loading_illustration_background_color: "000000"
+  idle_illustration_background_color: "000000"
+  listening_illustration_background_color: "000000"
+  thinking_illustration_background_color: "000000"
+  replying_illustration_background_color: "000000"
+  error_illustration_background_color: "000000"
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+  allowed_characters: "
+    !#%'()+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWYZ[]_abcdefghijklmnopqrst\
+    uvwxyz{|}°²³µ¿ÁÂÄÅÉÖÚßàáâãäåæçèéêëìíîðñòóôõöøùúûüýþāăąćčďĐđēėęěğĮįıļľŁłńňőř\
+    śšťũūůűųźŻżŽžơưșțΆΈΌΐΑΒΓΔΕΖΗΘΚΜΝΠΡΣΤΥΦάέήίαβγδεζηθικλμνξοπρςστυφχψωϊόύώАБВГ\
+    ДЕЖЗИКЛМНОПРСТУХЦЧШЪЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёђєіїјљњћאבגדהוזחטיכ\
+    לםמןנסעפץצקרשת،ءآأإئابةتجحخدذرزسشصضطظعغفقكلمنهوىيٹپچڈکگںھہیےংকচতধনফবযরলশষস়\
+    ািু্చయలిెొ్ംഅആഇഈഉഎഓകഗങചജഞടഡണതദധനപഫബഭമയരറലളവശസഹാിീുൂെേൈ്ൺൻർൽൾაბგდევზთილმნოპრ\
+    სტუფქყშჩცძჭხạảấầẩậắặẹẽếềểệỉịọỏốồổỗộớờởợụủứừửữựỳ—、一上不个中为主乾了些亮人任低佔何作供依侧係個側偵充光\
+    入全关冇冷几切到制前動區卧厅厨及口另右吊后吗启吸呀咗哪唔問啟嗎嘅嘛器圍在场執場外多大始安定客室家密寵对將小少左已帘常幫幾库度庫廊廚廳开式後恆感態成我戲\
+    戶户房所扇手打执把拔换掉控插摄整斯新明是景暗更最會有未本模機檯櫃欄次正氏水沒没洗活派温測源溫漏潮激濕灯為無煙照熱燈燥物狀玄现現瓦用發的盞目着睡私空窗立\
+    笛管節簾籬紅線红罐置聚聲脚腦腳臥色节著行衣解設調請謝警设调走路車车运連遊運過道邊部都量鎖锁門閂閉開關门闭除隱離電震霧面音頂題顏颜風风食餅餵가간감갔강개\
+    거게겨결경고공과관그금급기길깥꺼껐꼽나난내네놀누는능니다닫담대더데도동됐되된됨둡드든등디때떤뜨라래러렇렌려로료른를리림링마많명몇모무문물뭐바밝방배변보\
+    부불블빨뽑사산상색서설성세센션소쇼수스습시신실싱아안않알았애야어얼업없었에여연열옆오온완외왼요운움워원위으은을음의이인일임입있작잠장재전절정제져조족종\
+    주줄중줘지직진짐쪽차창천최추출충치침커컴켜켰쿠크키탁탄태탬터텔통트튼티파팬퍼폰표퓨플핑한함해했행혀현화활후휴힘，？"
+  font_glyphsets: GF_Latin_Core
+  font_family: Figtree
+
+esphome:
+  name: asistent7
+  friendly_name: "asistent 7"
+  min_version: 2025.5.0
+  name_add_mac_suffix: true
+  platformio_options:
+    build_flags: "-DBOARD_HAS_PSRAM"
+    board_build.esp-idf.memory_type: qio_opi
+    board_build.flash_mode: dio
+  on_boot:
+    priority: 600
+    then:
+    # Podsvícení
+      - lambda: |-
+          uint8_t cmd_bl[1] = { 0x00 };
+          id(bus_a).write(0x30, cmd_bl, 1);
+    #  - delay: 200ms
+    # Zapni zesilovač (unmute NS4168)
+     # - lambda: |-
+      #    uint8_t cmd_spk[1] = { 248 };
+       #   id(bus_a).write(0x30, cmd_spk, 1);
+      - delay: 200ms
+      - lambda: |-   
+          uint8_t cmd_audio[] = { 0xf8 }; 
+          id(bus_a).write(0x30, cmd_audio, 1);
+      - delay: 200ms
+      
+      
+      - script.execute: draw_display
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  cpu_frequency: 240MHz
+  framework:
+    type: esp-idf
+   
+    advanced:
+      enable_idf_experimental_features: true
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+
+psram:
+  mode: octal
+  speed: 120MHz
+  ignore_not_found: false
+api:
+  encryption:
+    key: !secret esp_encryption_key
+  on_client_connected:
+    - script.execute: draw_display
+  on_client_disconnected:
+    - script.execute: draw_display
+
+ota:
+  - platform: esphome
+
+logger:
+  level: DEBUG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+  manual_ip:
+    static_ip: 192.168.0.87
+    gateway: 192.168.0.2
+    subnet: 255.255.255.0
+  on_connect:
+    - script.execute: draw_display
+  on_disconnect:
+    - script.execute: draw_display
+
+captive_portal:
+
+
+button:
+  - platform: factory_reset
+    id: factory_reset_btn
+    internal: true
+
+
+sensor:
+  - platform: homeassistant
+    id: ha_temperature_sensor
+    entity_id: sensor.th_prujezd_temperature
+    internal: true
+    unit_of_measurement: °C
+    on_value:
+      - lvgl.indicator.update:
+          id: val_needle
+          value: !lambda return x;
+      - lvgl.label.update:
+          id: label_temp
+          text:
+            format: "%.1f°C"
+            args:
+              - x
+
+
+
+
+number:
+  - platform: homeassistant
+    name: "Backlight Slider Source"
+    entity_id: input_number.panelr2_bcklight
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "HA Slider received value: %.2f"
+            args:
+              - x
+        - light.turn_on:
+            id: backlight
+            brightness: !lambda 'return x / 5.0;'
+  - platform: template
+    name: LVGL Screen timeout
+    id: display_timeout
+    optimistic: true
+    unit_of_measurement: "s"
+    initial_value: 45
+    restore_value: true
+    min_value: 10
+    max_value: 600
+    step: 10
+    mode: box
+  
+touchscreen:
+  platform: gt911
+  id: touch
+  address: 0x5D
+  i2c_id: bus_a
+  on_touch:
+    then:
+      - light.turn_on: backlight
+
+  on_release:
+    - if:
+        condition: lvgl.is_paused
+        then:
+          - lvgl.resume
+          - light.turn_on: backlight
+i2c_device:
+  id: pca9557
+  address: 0x51
+  i2c_id: bus_a
+
+i2c:
+  sda: 15
+  scl: 16
+  scan: true
+  id: bus_a
+
+i2s_audio:
+  - id: i2s_mic
+    i2s_lrclk_pin: GPIO19      # MIC_WS
+    i2s_bclk_pin: GPIO2      # MIC_CLK
+  
+
+  - id: i2s_spk
+    i2s_lrclk_pin: GPIO6      # SPK I2S_LRCLK
+    i2s_bclk_pin: GPIO5       # SPK I2S_BCLK
+
+
+microphone:
+  - platform: i2s_audio
+    id: pdm_microphone
+    i2s_audio_id: i2s_mic     # ← MIKROFON BUS
+    i2s_din_pin: GPIO20       # MIC_SD
+    adc_type: external
+    pdm: True
+    
+    bits_per_sample: 16bit
+    channel: left
+
+speaker:
+  - platform: i2s_audio
+    id: box_speaker
+    i2s_audio_id: i2s_spk     # ← REPRODUKTOR BUS
+    i2s_dout_pin: GPIO4       # SPK I2S_SDIN
+    dac_type: external
+  
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: mono
+    buffer_duration: 100ms
+    timeout: 500ms
+media_player:
+  - platform: speaker
+    name: "aipanel přehrávač"
+    id: speaker_media_player
+    volume_min: 0.3
+    volume_max: 0.8
+    announcement_pipeline:
+      speaker: box_speaker
+      format: FLAC
+      sample_rate: 48000
+      num_channels: 1
+    files:
+      - id: timer_finished_sound
+        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
+    on_announcement:
+      # Zapni zesilovač PŘED přehráváním
+      - lambda: |-
+          uint8_t cmd[1] = { 0xF8 };
+          id(bus_a).write(0x30, cmd, 1);
+      - delay: 400ms
+      - if:
+          condition:
+            - microphone.is_capturing:
+          then:
+            - script.execute: stop_wake_word
+            - if:
+                condition:
+                  - lambda: return id(wake_word_engine_location).state == "In Home Assistant";
+                then:
+                  - wait_until:
+                      - not:
+                          voice_assistant.is_running:
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+            - delay: 200ms
+            - script.execute: draw_display
+    on_idle:
+      - delay: 600ms
+      # Vypni zesilovač PO přehrávání
+      - lambda: |-
+          uint8_t cmd[1] = { 249 };
+          id(bus_a).write(0x30, cmd, 1);
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - script.execute: start_wake_word
+            - script.execute: set_idle_or_mute_phase
+            - delay: 200ms
+            - script.execute: draw_display
+
+micro_wake_word:
+  id: mww
+  microphone:
+    microphone: pdm_microphone
+    gain_factor: 4
+  stop_after_detection: false
+  models:
+    model: github://esphome/micro-wake-word-models/models/okay_nabu.json@main
+    id: okay_nabu
+  on_wake_word_detected:
+    - lambda: ESP_LOGI("MWW", "WAKE WORD DETECTED!");
+    - voice_assistant.start:
+        wake_word: !lambda return wake_word;
+
+voice_assistant:
+  id: va
+  microphone: pdm_microphone
+  media_player: speaker_media_player
+  micro_wake_word: mww
+  noise_suppression_level: 2
+  auto_gain: 31dBFS
+  volume_multiplier: 2
+  on_listening:
+    - if:
+        condition:
+          - lvgl.is_paused
+          - light.is_off: backlight
+        then:
+          - lvgl.resume
+          - light.turn_on: backlight
+    
+    - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
+    - text_sensor.template.publish:
+        id: text_request
+        state: "..."
+    - text_sensor.template.publish:
+        id: text_response
+        state: "..."
+    - lvgl.label.update:
+        id: req_label
+        text: "..."
+    - lvgl.label.update:
+        id: reply_label
+        text: "..."
+    - delay: 50ms
+    - script.execute: draw_display
+  on_stt_vad_end:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
+    - script.execute: draw_display
+  on_stt_end:
+    - script.execute: draw_display
+    - text_sensor.template.publish:
+        id: text_request
+        state: !lambda return x;
+    - lvgl.label.update:
+        id: req_label
+        text: !lambda return x;
+    - script.execute:
+        id: send_stt_text_event
+        stt_text: !lambda return x;
+    
+  on_tts_start:
+   
+    - delay: 50ms
+    - text_sensor.template.publish:
+        id: text_response
+        state: !lambda return x;
+    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+    - lvgl.label.update:
+        id: reply_label
+        text: !lambda 'return x;'
+    - delay: 100ms
+    - script.execute: draw_display
+  
+  
+  on_end:
+    - wait_until:
+        condition:
+          - media_player.is_announcing: null
+        timeout: 0.5s
+    - wait_until:
+        - and:
+            - not:
+                media_player.is_announcing: null
+            - not:
+                speaker.is_playing: null
+    - if:
+        condition:
+          - lambda: return id(wake_word_engine_location).state == "On device";
+        then:
+          - lambda: id(va).set_use_wake_word(false);
+          - micro_wake_word.start: null
+    - delay: 100ms
+    - script.execute: set_idle_or_mute_phase
+    - delay: 300ms
+    - script.execute: draw_display
+  on_error:
+    - if:
+        condition:
+          lambda: return !id(init_in_progress);
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+          - script.execute: draw_display
+          - delay: 1s
+          - if:
+              condition:
+                switch.is_off: mute
+              then:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+              else:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: draw_display
+  on_client_connected:
+    - lambda: id(init_in_progress) = false;
+    - script.execute: start_wake_word
+    - script.execute: set_idle_or_mute_phase
+    - delay: 200ms
+    - script.execute: draw_display
+  on_client_disconnected:
+    - script.execute: stop_wake_word
+    - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - script.execute: draw_display
+  on_tts_end:
+    - delay: 400ms
+    - script.execute:
+        id: send_tts_uri_event
+        tts_uri: return x;
+
+script:
+  - id: time_update
+    then:
+      - lvgl.label.update:
+          id: clock_label
+          text: !lambda |-
+            return id(rtc_time).now().strftime("%H:%M:%S");
+      - lvgl.label.update:
+          id: date_value_label
+          text: !lambda |-
+            static const char * const mon_names[] = {"Led", "Un", "Bre", "Dub", "Kve", "Cvn",
+                                                     "Cvc", "Srp", "Zar", "Rij", "Lis", "Pro"};
+            static char date_buf[8];
+            auto now = id(rtc_time).now();
+            snprintf(date_buf, sizeof(date_buf), "%s %2d", mon_names[now.month-1], now.day_of_month);
+            return date_buf;
+            
+
+  - id: send_tts_uri_event
+    parameters:
+      tts_uri: string
+    then:
+      - homeassistant.event:
+          event: esphome.tts_uri
+          data:
+            uri: return tts_uri;
+
+  - id: send_stt_text_event
+    parameters:
+      stt_text: string
+    then:
+      - homeassistant.event:
+          event: esphome.stt_text
+          data:
+            text: return stt_text;
+
+  - id: draw_display
+    then:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - if:
+                condition:
+                  wifi.connected: null
+                then:
+                  - if:
+                      condition:
+                        api.connected: null
+                      then:
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_listening_phase_id};
+                            then:
+                              lvgl.page.show: listening_page
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_thinking_phase_id};
+                            then:
+                              lvgl.page.show: thinking_page
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
+                            then:
+                              lvgl.page.show: replying_page
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_error_phase_id};
+                            then:
+                              lvgl.page.show: error_page
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_muted_phase_id};
+                            then:
+                              lvgl.page.show: muted_page
+                        - if:
+                            condition:
+                              lambda: return id(voice_assistant_phase) == ${voice_assist_not_ready_phase_id};
+                            then:
+                              lvgl.page.show: no_ha_page
+                        - if:
+                            condition:
+                              lambda: >+
+                                return id(voice_assistant_phase) != ${voice_assist_listening_phase_id}
+                                &&
+                                       id(voice_assistant_phase) != ${voice_assist_thinking_phase_id} &&
+                                       id(voice_assistant_phase) != ${voice_assist_replying_phase_id} &&
+                                       id(voice_assistant_phase) != ${voice_assist_error_phase_id} &&
+                                       id(voice_assistant_phase) != ${voice_assist_muted_phase_id} &&
+                                       id(voice_assistant_phase) != ${voice_assist_not_ready_phase_id};
+                                     
+                            then:
+                              - lvgl.page.show: idle_page
+                      else:
+                        - lvgl.page.show: no_ha_page
+                else:
+                  - lvgl.page.show: no_wifi_page
+          else:
+            - lvgl.page.show: initializing_page
+
+  - id: start_wake_word
+    then:
+      - if:
+          condition:
+            and:
+              - not:
+                  - voice_assistant.is_running: null
+              - lambda: return id(wake_word_engine_location).state == "On device";
+          then:
+            - lambda: id(va).set_use_wake_word(false);
+            - micro_wake_word.start: null
+
+  - id: stop_wake_word
+    then:
+      - if:
+          condition:
+            lambda: return id(wake_word_engine_location).state == "On device";
+          then:
+            - micro_wake_word.stop: null
+
+  - id: set_idle_or_mute_phase
+    then:
+      - if:
+          condition:
+            switch.is_off: mute
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          else:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+
+
+
+image:
+  - file: ${error_illustration_file}
+    id: casita_error
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${idle_illustration_file}
+    id: casita_idle
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${listening_illustration_file}
+    id: casita_listening
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${thinking_illustration_file}
+    id: casita_thinking
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${replying_illustration_file}
+    id: casita_replying
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${loading_illustration_file}
+    id: casita_initializing
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: https://github.com/esphome/wake-word-voice-assistants/raw/main/error_box_illustrations/error-no-wifi.png
+    id: error_no_wifi
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+  - file: https://github.com/esphome/wake-word-voice-assistants/raw/main/error_box_illustrations/error-no-ha.png
+    id: error_no_ha
+    resize: 320x240
+    type: RGB565
+    transparency: alpha_channel
+
+font:
+  - file: arial.ttf
+    id: font_clock
+    size: 80
+  - file: arial.ttf
+    id: font_medium
+    size: 24
+  - file: arial.ttf
+    id: font_large
+    size: 32
+  - file: arial.ttf
+    id: font_small
+    size: 1
+  - file:
+      type: gfonts
+      family: ${font_family}
+      weight: 300
+      italic: true
+    id: font_request
+    size: 20
+    glyphsets:
+      - ${font_glyphsets}
+  - file:
+      type: gfonts
+      family: ${font_family}
+      weight: 300
+    id: font_response
+    size: 20
+    glyphsets:
+      - ${font_glyphsets}
+
+switch:
+  - platform: template
+    name: Antiburn
+    id: switch_antiburn
+    icon: mdi:television-shimmer
+    optimistic: true
+    entity_category: config
+    turn_on_action:
+      - logger.log: Starting Antiburn
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume: null
+            - lvgl.widget.redraw: null
+      - lvgl.pause:
+          show_snow: true
+    turn_off_action:
+      - logger.log: Stopping Antiburn
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume: null
+            - lvgl.widget.redraw: null
+
+  - platform: template
+    name: Mute
+    id: mute
+    icon: "mdi:microphone-off"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    on_turn_off:
+      - microphone.unmute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+      - script.execute: draw_display
+    on_turn_on:
+      - microphone.mute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+      - script.execute: draw_display
+  - platform: template
+    id: timer_ringing
+    optimistic: true
+    internal: true
+    restore_mode: ALWAYS_OFF
+    on_turn_off:
+      - lambda: |-
+              id(speaker_media_player)
+                ->make_call()
+                .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
+                .set_announcement(true)
+                .perform();
+              id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
+      - media_player.stop:
+          announcement: true
+    on_turn_on:
+      - lambda: |-
+            id(speaker_media_player)
+              ->make_call()
+              .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
+              .set_announcement(true)
+              .perform();
+            id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
+      - media_player.speaker.play_on_device_media_file:
+          media_file: timer_finished_sound
+          announcement: true
+      - delay: 15min
+      - switch.turn_off: timer_ringing
+
+select:
+  - platform: template
+    entity_category: config
+    name: Wake word engine location
+    id: wake_word_engine_location
+    icon: "mdi:account-voice"
+    optimistic: true
+    restore_value: true
+    options:
+      - In Home Assistant
+      - On device
+    initial_option: On device
+    on_value:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - wait_until:
+                lambda: return id(voice_assistant_phase) == ${voice_assist_muted_phase_id} || id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
+            - if:
+                condition:
+                  lambda: return x == "In Home Assistant";
+                then:
+                  - micro_wake_word.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - lambda: id(va).set_use_wake_word(true);
+                        - voice_assistant.start_continuous:
+            - if:
+                condition:
+                  lambda: return x == "On device";
+                then:
+                  - lambda: id(va).set_use_wake_word(false);
+                  - voice_assistant.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - micro_wake_word.start
+
+globals:
+  - id: init_in_progress
+    type: bool
+    restore_value: false
+    initial_value: "true"
+  - id: voice_assistant_phase
+    type: int
+    restore_value: false
+    initial_value: ${voice_assist_not_ready_phase_id}
+  - id: global_first_active_timer
+    type: voice_assistant::Timer
+    restore_value: false
+  - id: global_is_timer_active
+    type: bool
+    restore_value: false
+  - id: global_first_timer
+    type: voice_assistant::Timer
+    restore_value: false
+  - id: global_is_timer
+    type: bool
+    restore_value: false
+
+
+text_sensor:
+  - id: text_request
+    platform: template
+    on_value:
+      lambda: |-
+        if(id(text_request).state.length()>32) {
+          std::string name = id(text_request).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(),31);
+          id(text_request).state = (truncated+"...").c_str();
+        }
+  - id: text_response
+    platform: template
+    on_value:
+      lambda: |-
+        if(id(text_response).state.length()>32) {
+          std::string name = id(text_response).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(),31);
+          id(text_response).state = (truncated+"...").c_str();
+        }
+
+  - platform: homeassistant
+    id: text_stav
+    entity_id: lock.zamek_vrata
+    on_value:
+      - lvgl.label.update:
+          id: lock_label
+          text: !lambda |-
+            if (x == "locked") return std::string("Zamčeno");
+            if (x == "unlocked") return std::string("Odemčeno");
+            return std::string("Neznámý stav");
+
+
+
+color:
+  - id: idle_color
+    hex: ${idle_illustration_background_color}
+  - id: listening_color
+    hex: ${listening_illustration_background_color}
+  - id: thinking_color
+    hex: ${thinking_illustration_background_color}
+  - id: replying_color
+    hex: ${replying_illustration_background_color}
+  - id: loading_color
+    hex: ${loading_illustration_background_color}
+  - id: error_color
+    hex: ${error_illustration_background_color}
+  - id: active_timer_color
+    hex: "26ed3a"
+  - id: paused_timer_color
+    hex: "3b89e3"
+
+
+lvgl:
+  buffer_size: 10%
+  on_idle:
+    timeout: !lambda "return (id(display_timeout).state * 1000);"
+    then:
+      - logger.log: "LVGL idle - display off"
+      - light.turn_off: backlight
+      - lvgl.pause
+  style_definitions:
+    - id: meter_style
+      border_width: 0
+      outline_width: 0
+      align: center
+      bg_color: 0
+    - id: title_style
+      text_font: font_large
+      align: center
+      text_color: 16777215
+      bg_opa: TRANSP
+      bg_color: 0
+      radius: 4
+      pad_all: 2
+    - id: detail_style
+      text_font: font_medium
+      align: center
+      text_color: 16777215
+      bg_opa: TRANSP
+      bg_color: 0
+      radius: 4
+      pad_all: 2
+    - id: base_panel_style
+      bg_color: 0
+      border_width: 0
+      radius: 0
+      pad_all: 0
+    - id: section_panel_style
+      bg_color: 1118481
+      border_width: 1
+      border_color: 4473924
+      radius: 10
+      pad_all: 10
+    - id: title_label_style
+      text_font: font_medium
+      text_color: 15461146
+      align: CENTER
+      bg_opa: TRANSP
+    - id: sensor_value_style
+      text_font: font_large
+      text_color: 16777215
+      align: CENTER
+      bg_opa: TRANSP
+    - id: button_label_style
+      text_font: font_medium
+      text_color: 15461146
+      align: CENTER
+      bg_opa: TRANSP
+    - id: clock_label_style
+      text_font: font_clock
+      text_color: 15461146
+      align: CENTER
+    - id: button_style
+      bg_color: 16777215
+      radius: 15
+      border_width: 1
+      border_color: 13421772
+      pad_all: 10
+  pages:
+    - id: listening_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: casita_listening
+            align: CENTER
+    - id: error_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: casita_error
+            align: CENTER
+    - id: no_ha_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: error_no_ha
+            align: CENTER
+    - id: no_wifi_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: error_no_wifi
+            align: CENTER
+    - id: muted_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: casita_idle
+            align: CENTER
+    - id: initializing_page
+      bg_color: listening_color
+      widgets:
+        - image:
+            src: casita_initializing
+            align: CENTER
+    - id: thinking_page
+      bg_color: 0x2f0433
+      widgets:
+        - image:
+            src: casita_thinking
+            align: CENTER
+    - id: replying_page
+      bg_color: 0x2a2a04
+      widgets:
+        - image:
+            src: casita_replying
+            align: CENTER
+    - id: idle_page
+      bg_color: 0
+      widgets:
+        - obj:
+            align: CENTER
+            width: 800
+            height: 480
+            pad_all: 6
+            bg_opa: TRANSP
+            border_opa: TRANSP
+            layout:
+              type: GRID
+              grid_columns:
+                - FR(50)
+                - FR(25)
+                - FR(25)
+              grid_rows:
+                - FR(1)
+                - FR(1)
+                - FR(1)
+            widgets:
+              - obj:
+                  id: time_section
+                  styles: section_panel_style      
+                  height: 100%
+                  width: 100%       
+                  bg_color: 0x4761d0
+                  grid_cell_column_pos: 0 
+                  grid_cell_row_pos: 0 
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: STRETCH                      
+                  widgets:   
+                    - label:
+                        id: date_value_label
+                        styles: title_label_style                        
+                        align: TOP_MID                        
+                        text: "dd.mm.yyyy"                 
+                    - label:
+                        id: clock_label
+                        styles: clock_label_style
+                        align: CENTER  
+                        y: 15 
+                        text: "00:00"
+
+              - obj:
+                  id: temp_section
+                  styles: section_panel_style
+                  height: 100%
+                  width: 100%
+                  bg_color: 0x61d047
+                  scrollbar_mode: "OFF"
+                  grid_cell_column_pos: 1
+                  grid_cell_row_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: STRETCH
+                  widgets:
+                    - meter:
+                        height: 100%
+                        width: 100%
+                        border_width: 0
+                        outline_width: 0
+                        align: center
+                        bg_color: 0x40a129
+                        scales:
+                          angle_range: 180
+                          range_to: 40
+                          range_from: -20
+                          ticks:
+                            count: 1000
+                          indicators:
+                            - line:
+                                id: val_needle
+                                width: 8
+                                color: 16777215
+                                r_mod: 12
+                                value: 50
+                            - arc:
+                                r_mod: 10
+                                width: 20
+                                start_value: -20
+                                end_value: 40
+                            - tick_style:
+                                color_start: 3381759
+                                color_end: 13371909
+                    - label:
+                        styles: detail_style
+                        y: 31
+                        x: -70
+                        text: "-20"
+                        text_color: 0x4761d0
+                       
+                    - label:
+                        styles: detail_style
+                        y: 31
+                        x: 70
+                        text: "40"
+                        text_color: 16711680
+                    - label:
+                        styles: title_style
+                        id: label_temp
+                        y: -5
+             
+              - obj:
+                  id: button_section
+                  styles: section_panel_style
+                  height: 100%
+                  width: 100%
+                  bg_color: 0x47d0b6
+                  grid_cell_column_pos: 0
+                  grid_cell_row_pos: 1
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: STRETCH
+                  widgets:
+                    - button:
+                        id: unlock_button
+                        align: left_mid
+                        width: 100
+                        
+                        height: 100
+                        radius: 50
+                        bg_color: 16711680
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text: "Odemknout"
+                              text_color: 65280
+                        on_click:
+                          - homeassistant.action:
+                              action: lock.unlock
+                              data:
+                                entity_id: lock.zamek_vrata
+                    - button:
+                        id: lock_button
+                        align: right_mid
+                       
+                        width: 100
+                        height: 100
+                        radius: 50
+                        bg_color: 65280
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text: "Zamknout"
+                              text_color: 16711680
+                        on_click:
+                          - homeassistant.action:
+                              action: lock.lock
+                              data:
+                                entity_id: lock.zamek_vrata
+                    - label:
+                        id: lock_label
+                        width: 100
+                        height: 50
+                        align: TOP_MID 
+                        radius: 50
+                        bg_color: 16777215
+                        text: !lambda |-
+                          return id(text_stav).state;
+                        text_color: 0xa12940
+              - obj:
+                  id: antiburn_section
+                  styles: section_panel_style
+                  align: CENTER
+                  height: 100%
+                  width: 100%
+                  bg_color: 0xd0b647
+                  grid_cell_column_pos: 2
+                  grid_cell_row_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: STRETCH
+                  widgets:
+                    - button:
+                        id: antiburn_switch
+                        width: 100
+                        height: 50
+                        align: CENTER
+                        checkable: true
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text: Antiburn
+                              text_color: 0xd0b647
+                        on_click:
+                          - if:
+                              condition:
+                                lvgl.is_paused: null
+                              then:
+                                - lvgl.resume: null
+                                - lvgl.widget.update:
+                                    id: antiburn_switch
+                                    state:
+                                      checked: false
+                              else:
+                                - lvgl.pause:
+                                    show_snow: true
+                                - lvgl.widget.update:
+                                    id: antiburn_switch
+                                    state:
+                                      checked: true
+                                - delay: 3min
+                                - lvgl.resume: null
+                                - lvgl.widget.update:
+                                    id: antiburn_switch
+                                    state:
+                                      checked: false
+
+              - obj:
+                  id: voice_box
+                  styles: section_panel_style
+                  height: 100%
+                  width: 100%
+                  grid_cell_column_pos: 0
+                  grid_cell_row_pos: 2
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: STRETCH
+                  bg_color: 0xa12940
+                  widgets:
+                    - label:
+                        id: req_label
+                        x: 5
+                        y: 5
+                        text_font: font_request
+                        width: 260
+                        long_mode: SCROLL_CIRCULAR
+                        text: return id(text_request).state;
+                        text_color: 15461146
+                    - label:
+                        id: reply_label
+                        x: 5
+                        y: 30
+                        text_font: font_request
+                        width: 260
+                        long_mode: SCROLL_CIRCULAR
+                        text: return id(text_response).state;
+                        text_color: 15461146
+time:  
+
+  - platform: pcf8563    # BM8563 je kompatibilní s PCF8563 driverem
+    id: rtc_time
+    address: 0x51
+    i2c_id: bus_a
+    
+    on_time_sync:
+     - logger.log: "RTC čas synchronizován s HA"
+    # -sync_interval: "1 minute"  # Example configuration for syncing every minute
+    # - sync_time: "18:00:21"
+    # -logger.log: "RTC čas synchronizován s HA"
+     - script.execute: time_update
+  - platform: homeassistant
+    id: time_comp
+    on_time_sync:
+      - script.execute: time_update
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: clock_label
+          text: !lambda |-
+            auto time = id(rtc_time).now();
+            return str_sprintf("%02d:%02d:%02d", time.hour, time.minute, time.second );
+      - script.execute: time_update
+
+output:
+  - platform: template
+    id: stc8h_backlight_output
+    type: float
+    write_action:
+      - lambda: |-
+          uint8_t command;
+          if (state <= 0.0f) {
+            command = 245;
+          } else {
+            command = (uint8_t) roundf((1.0f - state) * 244.0f);
+          }
+          uint8_t cmd[1] = { command };
+          id(bus_a).write(0x30, cmd, 1);
+          ESP_LOGD("backlight", "State: %.2f | Brightness command: %d", state, command);
+
+  - platform: template
+    id: backlight_output
+    type: binary
+    write_action:
+      - lambda: |-
+          uint8_t config_reg = 0x03;
+          uint8_t config_data = 0xFD;
+          id(pca9557).write_byte(config_reg, config_data);
+          delay(10);
+          uint8_t output_reg = 0x01;
+          uint8_t output_data = state ? 0x02 : 0x00;
+          id(pca9557).write_byte(output_reg, output_data);
+
+binary_sensor:
+  - platform: homeassistant
+    id: lock
+    entity_id: lock.zamek_vrata
+    publish_initial_state: true
+    on_state:
+      then:
+        lvgl.widget.update:
+          id: lock_label
+          state:
+            checked: !lambda return x;
+  - platform: homeassistant
+    name: "Backlight Control Boolean"
+    entity_id: input_boolean.panelr2_bcklight
+    internal: true
+    on_state:
+      then:
+        - logger.log:
+            format: "HA Backlight Boolean received state: %s"
+            args:
+              - 'x ? "ON" : "OFF"'
+        - if:
+            condition:
+              lambda: 'return x;'
+            then:
+              - light.turn_on:
+                  id: backlight
+            else:
+              - light.turn_off:
+                  id: backlight
+
+
+
+ 
+ 
+light:
+  - platform: monochromatic
+    name: "Asistent23 Backlight"
+    id: backlight
+    output: stc8h_backlight_output
+    internal: false
+    restore_mode: ALWAYS_ON
+
+display:
+  - platform: rpi_dpi_rgb
+    id: main_display
+    color_order: RGB
+    invert_colors: true
+    update_interval: never
+    auto_clear_enabled: false
+    dimensions:
+      width: 800
+      height: 480
+    de_pin: 42
+    hsync_pin: 40
+    vsync_pin: 41
+    pclk_pin: 39
+    pclk_frequency: 20MHz
+    hsync_pulse_width: 4
+    hsync_front_porch: 8
+    hsync_back_porch: 8
+    vsync_pulse_width: 4
+    vsync_front_porch: 8
+    vsync_back_porch: 8
+    data_pins:
+      red:
+        - 7
+        - 17
+        - 18
+        - 3
+        - 46
+      green:
+        - 9
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+      blue:
+        - 21
+        - 47
+        - 48
+        - 45
+        - 38
